@@ -5,7 +5,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware # type: ignore
 import os
 
 from redis import Redis
-from routers import questions, exams, answers, user_exams
+from routers import questions, exams, answers, user_exams, user_answers
 from routers.auth import auth
 from aws import s3
 
@@ -46,3 +46,4 @@ app.include_router(exams.router)
 app.include_router(questions.router)
 app.include_router(answers.router)
 app.include_router(user_exams.router)
+app.include_router(user_answers.router)

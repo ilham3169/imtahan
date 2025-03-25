@@ -13,8 +13,8 @@ class User(Base):
     last_name = Column(String(63), nullable=False)
     email = Column(String(255), unique=True, nullable=True)
     is_admin = Column(Boolean, nullable=False, default=False)
-    password = Column(String(255), nullable=False)  # Changed from hashed_pass to password
-    result = Column(Integer, nullable=False)        # Changed to Integer
+    password = Column(String(255), nullable=False)
+    result = Column(Integer, nullable=False)
     username = Column(String(50), unique=True, nullable=False)
 
 class Exam(Base):
@@ -30,7 +30,7 @@ class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True)
-    content = Column(String, nullable=False)  # Using String without length for flexibility
+    content = Column(String, nullable=False)
     exam_id = Column(Integer, ForeignKey("exams.id"), nullable=False)
     
     exam = relationship("Exam", back_populates="questions")
@@ -53,4 +53,12 @@ class UserExam(Base):
     exam_id = Column(Integer, ForeignKey("exams.id"), nullable=False)
     completed_at = Column(DateTime, default=func.now())
     score = Column(Integer)
+
+class UserAnswer(Base):
+    __tablename__ = "user_answers"
     
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    question_id = Column(Integer, ForeignKey("questions.id"), primary_key=True)
+    answer_id = Column(Integer, ForeignKey("answers.id"), primary_key=True)
+    user_answer = Column(String(255))  # User's submitted answer
+    answer_result = Column(Boolean)  # True if correct, False if incorrect

@@ -16,7 +16,7 @@ router = APIRouter(
 
 SECRET_KEY = "your-secret-key" 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  
+ACCESS_TOKEN_EXPIRE_MINUTES = 300
 
 def get_db():
     db = sessionLocal()

@@ -78,3 +78,24 @@ class UserExamResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class UserAnswerBase(BaseModel):
+    user_answer: Optional[str] = None
+
+class AnswerData(BaseModel):  # Nested structure for the "answer" field
+    question_id: int
+    answer_id: Optional[int] = None
+    user_answer: str
+
+class UserAnswerCreate(BaseModel):  # Updated to match nested request body
+    user_id: int
+    answer: AnswerData
+
+class UserAnswerResponse(UserAnswerBase):
+    user_id: int
+    question_id: int
+    answer_id: Optional[int] = None
+    answer_result: Optional[bool] = None
+    
+    class Config:
+        from_attributes = True
