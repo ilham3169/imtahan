@@ -85,7 +85,7 @@ class UserAnswerBase(BaseModel):
 class AnswerData(BaseModel):  # Nested structure for the "answer" field
     question_id: int
     answer_id: Optional[int] = None
-    user_answer: str
+    user_answer: Optional[str] = None
 
 class UserAnswerCreate(BaseModel):  # Updated to match nested request body
     user_id: int
