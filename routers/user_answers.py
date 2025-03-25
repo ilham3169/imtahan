@@ -39,24 +39,28 @@ async def create_user_answer(user_answer_data: UserAnswerCreate, db: db_dependen
         answer_id = answer_data.answer_id
         user_answer = answer_data.user_answer
 
-        # Check if the answer exists and get the correct answer content
-        correct_answer_record = db.query(Answer).filter(Answer.id == answer_id).first()
-        if not correct_answer_record:
-            raise HTTPException(status_code=404, detail=f"Answer with id {answer_id} not found")
+        # Default answer_result to None
+        answer_result = None
 
-        # Compute answer_result
-        answer_result = (user_answer == correct_answer_record.content)
+        # If answer_id is provided, check if it exists and compute answer_result if user_answer is also provided
+        if answer_id is not None:
+            correct_answer_record = db.query(Answer).filter(Answer.id == answer_id).first()
+            if not correct_answer_record:
+                raise HTTPException(status_code=404, detail=f"Answer with id {answer_id} not found")
+            # Compute answer_result only if user_answer is provided
+            if user_answer is not None:
+                answer_result = (user_answer == correct_answer_record.content)
 
-        # Create new UserAnswer object
+        # Create new UserAnswer object (answer_id can be NULL in DB if not provided)
         db_user_answer = UserAnswer(
             user_id=user_id,
             question_id=question_id,
-            answer_id=answer_id,
-            user_answer=user_answer,
-            answer_result=answer_result
+            answer_id=answer_id,  # Will be NULL if not provided
+            user_answer=user_answer,  # Will be NULL if not provided
+            answer_result=answer_result  # Will be NULL if not computed
         )
 
-        # Check for duplicate entry
+        # Check for duplicate entry (handles NULL answer_id correctly)
         existing_answer = db.query(UserAnswer).filter(
             UserAnswer.user_id == user_id,
             UserAnswer.question_id == question_id,

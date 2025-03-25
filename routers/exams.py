@@ -34,6 +34,11 @@ async def get_all_exams(db: db_dependency): # type: ignore
     exams = db.query(Exam).all()
     return exams
 
+@router.get("/{exam_id}", response_model=List[ExamResponse], status_code=status.HTTP_200_OK)
+async def get_specific_exam(exam_id: int, db: db_dependency): # type: ignore
+    exams = db.query(Exam).filter(Exam.id == exam_id).all()
+    return exams
+
 @router.post("/create", response_model=ExamResponse, status_code=status.HTTP_201_CREATED)
 async def create_exam(exam: ExamCreate, db: db_dependency): # type: ignore
     db_exam = Exam( name=exam.name, time=exam.time )
@@ -43,6 +48,7 @@ async def create_exam(exam: ExamCreate, db: db_dependency): # type: ignore
     db.refresh(db_exam)
     
     return db_exam
+
 
 @router.delete("/{exam_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_exam(exam_id: int, db: db_dependency): # type: ignore

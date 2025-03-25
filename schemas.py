@@ -82,19 +82,19 @@ class UserExamResponse(BaseModel):
 class UserAnswerBase(BaseModel):
     user_answer: Optional[str] = None
 
-class AnswerData(BaseModel):  # Nested structure for the "answer" field
+class AnswerData(BaseModel):  # Updated to make fields optional
     question_id: int
-    answer_id: Optional[int] = None
-    user_answer: Optional[str] = None
+    answer_id: Optional[int] = None  # Optional
+    user_answer: Optional[str] = None  # Optional
 
-class UserAnswerCreate(BaseModel):  # Updated to match nested request body
+class UserAnswerCreate(BaseModel):
     user_id: int
-    answer: AnswerData
+    answer: List[AnswerData]  # List of answers with optional fields
 
 class UserAnswerResponse(UserAnswerBase):
     user_id: int
     question_id: int
-    answer_id: Optional[int] = None
+    answer_id: int
     answer_result: Optional[bool] = None
     
     class Config:
