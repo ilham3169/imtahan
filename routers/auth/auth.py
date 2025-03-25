@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from database import sessionLocal
 from models import User
-from schemas import UserCreate, UserLogin
+from schemas import UserCreate, UserLogin, UserResponse
 
 router = APIRouter(
     prefix="/auth",
@@ -27,7 +27,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-# Function to create JWT token
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
@@ -37,6 +36,25 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+async def get_current_user(token: str, db: db_dependency):
+    try:
+        # Decode the token
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token: username not found")
+        
+        # Fetch the user from the database
+        user = db.query(User).filter(User.username == username).first()
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 # Create user
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -91,3 +109,7 @@ async def login(db: db_dependency, login_data: UserLogin):
             "result": user.result
         }
     }
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(user: User = Depends(get_current_user)):
+    return user
